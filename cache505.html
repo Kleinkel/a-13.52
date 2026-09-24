@@ -7,100 +7,164 @@
 html,body{
   min-height:100%;background:#050914;color:#e2eaf5;
   font-family:'Courier New',Courier,monospace;
-  text-align:center;overflow:hidden;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;overflow-x:hidden;overflow-y:auto;
 }
 h1{color:#e2eaf5;text-shadow:none;font-size:inherit;font-weight:normal;}
-a{text-decoration:none;}hr{display:none;}
+a{text-decoration:none;}
 body::before{
   content:'';position:fixed;inset:0;
-  background-image:linear-gradient(rgba(0,180,255,0.035) 1px,transparent 1px),
+  background-image:
+    linear-gradient(rgba(0,180,255,0.035) 1px,transparent 1px),
     linear-gradient(90deg,rgba(0,180,255,0.035) 1px,transparent 1px);
   background-size:44px 44px;pointer-events:none;z-index:0;
 }
-.hub-wrap{
-  position:relative;z-index:1;width:100%;max-width:520px;
-  padding:30px 20px 28px;display:flex;flex-direction:column;
-  align-items:center;gap:22px;min-height:100vh;justify-content:center;
+
+/* ── Loading screen ───────────────────────────────────────── */
+#loader{
+  position:fixed;inset:0;z-index:9999;background:#050914;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  transition:opacity 0.7s ease;
 }
+#loader.out{opacity:0;pointer-events:none;}
+.ld-brand{
+  font-family:Arial Black,Arial,Helvetica,sans-serif;
+  font-size:clamp(26px,5.5vw,42px);white-space:nowrap;letter-spacing:0.1em;
+  color:#e2eaf5;line-height:1;opacity:0;
+  animation:brand-in 0.9s ease 0.2s forwards;
+}
+.ld-brand span{color:#00CFFF;}
+.ld-ring{position:relative;width:90px;height:90px;flex-shrink:0;opacity:0;animation:fade-in 0.5s ease 0.8s forwards;}
+.ld-ring-svg{width:100%;height:100%;animation:ring-spin 2s linear infinite;filter:drop-shadow(0 0 6px #00CFFF);}
+.ld-ring-arc{stroke:#00CFFF;stroke-dasharray:283;stroke-dashoffset:71;stroke-linecap:round;}
+.ld-ring-track{stroke:rgba(0,207,255,0.1);}
+.ld-ring-dot{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:10px;height:10px;border-radius:50%;background:#00CFFF;
+  box-shadow:0 0 10px #00CFFF,0 0 20px rgba(0,207,255,0.4);
+  animation:dot-pulse 1.4s ease-in-out infinite alternate;
+}
+.ld-sub{font-size:11px;color:#2a3a55;letter-spacing:0.14em;opacity:0;animation:fade-in 0.5s ease 0.9s forwards;}
+.ld-bar-track{width:min(260px,70vw);height:2px;background:rgba(0,207,255,0.08);border-radius:2px;overflow:hidden;opacity:0;animation:fade-in 0.4s ease 1.0s forwards;}
+.ld-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#7B5EF8,#00CFFF);border-radius:2px;box-shadow:0 0 8px rgba(0,207,255,0.5);animation:bar-fill 1.2s ease 1.0s forwards;}
+
+/* ── Main content ─────────────────────────────────────────── */
+#main{
+  position:relative;z-index:1;opacity:0;transition:opacity 0.6s ease;
+  width:100%;max-width:720px;margin:0 auto;padding:30px 20px 28px;
+  display:flex;flex-direction:column;align-items:center;gap:22px;
+  min-height:100vh;justify-content:center;
+}
+#main.visible{opacity:1;}
 .brand-name{
   font-family:Arial Black,Arial,Helvetica,sans-serif;
-  font-size:clamp(36px,11vw,58px);font-weight:900;
-  letter-spacing:0.1em;color:#e2eaf5;line-height:1;
+  font-size:clamp(26px,5.5vw,42px);white-space:nowrap;
+  font-weight:900;letter-spacing:0.1em;color:#e2eaf5;line-height:1;
 }
 .brand-name .ac{color:#00CFFF;}
-.brand-sub{font-size:12px;color:#2a3a55;letter-spacing:0.14em;margin-top:8px;}
+.brand-sub{font-size:13px;color:#3a4e6a;letter-spacing:0.14em;margin-top:10px;}
 .ring-wrap{position:relative;width:110px;height:110px;flex-shrink:0;}
-.ring-svg{
-  width:100%;height:100%;
-  animation:ring-spin 2.4s linear infinite;
-  filter:drop-shadow(0 0 7px #00CFFF);transition:filter 0.5s;
-}
-.ring-arc{
-  stroke:#00CFFF;stroke-dasharray:283;stroke-dashoffset:71;
-  stroke-linecap:round;transition:stroke 0.5s;
-}
+.ring-svg{width:100%;height:100%;animation:ring-spin 2.4s linear infinite;filter:drop-shadow(0 0 7px #00CFFF);transition:filter 0.5s;}
+.ring-arc{stroke:#00CFFF;stroke-dasharray:283;stroke-dashoffset:71;stroke-linecap:round;transition:stroke 0.5s;}
 .ring-track{stroke:rgba(0,207,255,0.1);}
 .ring-dot{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:12px;height:12px;border-radius:50%;
-  background:#00CFFF;box-shadow:0 0 10px #00CFFF,0 0 22px rgba(0,207,255,0.4);
-  animation:dpulse 1.5s ease-in-out infinite alternate;
-  transition:background 0.5s,box-shadow 0.5s;
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:12px;height:12px;border-radius:50%;background:#00CFFF;
+  box-shadow:0 0 10px #00CFFF,0 0 22px rgba(0,207,255,0.4);
+  animation:dot-pulse 1.5s ease-in-out infinite alternate;transition:background 0.5s,box-shadow 0.5s;
 }
-.progress-track{
-  width:min(340px,85vw);height:3px;
-  background:rgba(0,207,255,0.08);border-radius:3px;overflow:hidden;
-}
-.progress-fill{
-  height:100%;width:0%;
-  background:linear-gradient(90deg,#7B5EF8,#00CFFF);
-  border-radius:3px;transition:width 0.3s ease;
-  box-shadow:0 0 8px rgba(0,207,255,0.5);
-}
-.status-box{
-  width:100%;background:rgba(5,12,28,0.85);
-  border:1px solid rgba(0,207,255,0.14);border-radius:6px;overflow:hidden;
-}
-.status-hdr{
-  padding:8px 14px;border-bottom:1px solid rgba(0,207,255,0.1);
-  display:flex;align-items:center;gap:8px;
-  font-size:10px;color:#2a3a55;letter-spacing:0.12em;
-}
-#sdot{
-  width:6px;height:6px;border-radius:50%;
-  background:#00CFFF;box-shadow:0 0 6px #00CFFF;
-  animation:dpulse 1.5s ease-in-out infinite alternate;
-  transition:background 0.5s,box-shadow 0.5s;flex-shrink:0;
-}
-#msgs{
-  display:block;padding:22px 16px;
-  font-family:'Courier New',Courier,monospace;
-  font-size:clamp(13px,3.5vw,17px);
-  color:#00CFFF;text-align:center;line-height:1.6;
-  text-shadow:0 0 12px rgba(0,207,255,0.35);
-  transition:color 0.5s,text-shadow 0.5s;
-}
-.credits{font-size:10px;color:#1e2d42;letter-spacing:0.05em;line-height:2.2;}
-.credits a{color:#1e3650;transition:color 0.2s;}
-.credits a:hover{color:#00CFFF;}
-@keyframes ring-spin{to{transform:rotate(360deg);}}
-@keyframes dpulse{
-  from{transform:translate(-50%,-50%) scale(0.7);opacity:0.5;}
-  to{transform:translate(-50%,-50%) scale(1.2);opacity:1;}
-}
-body.s-ok .ring-arc{stroke:#22D68A;}
-body.s-ok .ring-svg{filter:drop-shadow(0 0 7px #22D68A);animation-duration:6s;}
+.progress-track{width:min(340px,85vw);height:3px;background:rgba(0,207,255,0.08);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#7B5EF8,#00CFFF);border-radius:3px;box-shadow:0 0 8px rgba(0,207,255,0.5);transition:width 0.3s ease;}
+.status-box{width:100%;background:rgba(5,12,28,0.85);border:1px solid rgba(0,207,255,0.14);border-radius:6px;overflow:hidden;}
+.status-hdr{padding:8px 14px;border-bottom:1px solid rgba(0,207,255,0.1);display:flex;align-items:center;gap:8px;font-size:10px;color:#2a3a55;letter-spacing:0.12em;}
+#sdot{width:6px;height:6px;border-radius:50%;background:#00CFFF;box-shadow:0 0 6px #00CFFF;animation:dot-pulse 1.5s ease-in-out infinite alternate;transition:background 0.5s,box-shadow 0.5s;flex-shrink:0;}
+#msgs{display:block;padding:22px 16px;font-family:'Courier New',Courier,monospace;font-size:clamp(13px,3.5vw,17px);color:#00CFFF;text-align:center;line-height:1.6;text-shadow:0 0 12px rgba(0,207,255,0.35);transition:color 0.5s,text-shadow 0.5s;}
+.credits{font-size:11px;color:#1e2d42;letter-spacing:0.05em;line-height:2.2;}
+body.s-ok .ring-arc{stroke:#22D68A;}body.s-ok .ring-svg{filter:drop-shadow(0 0 7px #22D68A);animation-duration:6s;}
 body.s-ok .ring-dot{background:#22D68A;box-shadow:0 0 10px #22D68A,0 0 22px rgba(34,214,138,0.4);}
 body.s-ok #sdot{background:#22D68A;box-shadow:0 0 6px #22D68A;}
 body.s-ok #msgs{color:#22D68A;text-shadow:0 0 12px rgba(34,214,138,0.35);}
-body.s-err .ring-arc{stroke:#F05050;}
-body.s-err .ring-svg{filter:drop-shadow(0 0 7px #F05050);animation:none;}
+body.s-ok .progress-fill{background:#22D68A;box-shadow:0 0 8px rgba(34,214,138,0.5);}
+body.s-err .ring-arc{stroke:#F05050;}body.s-err .ring-svg{filter:drop-shadow(0 0 7px #F05050);animation:none;}
 body.s-err .ring-dot{background:#F05050;box-shadow:0 0 10px #F05050;animation:none;}
 body.s-err #sdot{background:#F05050;box-shadow:0 0 6px #F05050;animation:none;}
 body.s-err #msgs{color:#F05050;text-shadow:0 0 12px rgba(240,80,80,0.3);}
-body.s-ok .progress-fill{width:100%;background:#22D68A;box-shadow:0 0 8px rgba(34,214,138,0.5);}
+@keyframes ring-spin{to{transform:rotate(360deg);}}
+@keyframes dot-pulse{from{transform:translate(-50%,-50%) scale(0.7);opacity:0.5;}to{transform:translate(-50%,-50%) scale(1.2);opacity:1;}}
+@keyframes brand-in{from{opacity:0;transform:scale(0.82) translateY(-12px);}to{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes fade-in{to{opacity:1;}}
+@keyframes bar-fill{from{width:0%;}to{width:100%;}}
+
+/* ══ SUCCESS / FAIL OVERLAYS ══════════════════════════════════ */
+.jb-overlay{
+  position:fixed;inset:0;z-index:8888;
+  background:rgba(4,6,14,0.93);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  opacity:0;visibility:hidden;
+  transition:opacity 0.5s ease,visibility 0.5s ease;
+  pointer-events:none;
+}
+.jb-overlay.show{opacity:1;visibility:visible;pointer-events:auto;}
+
+/* Icon ring */
+.jb-icon-ring{
+  width:110px;height:110px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  animation:icon-ring-in 0.55s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  opacity:0;
+}
+#jb-success .jb-icon-ring{
+  border:2px solid #22D68A;
+  box-shadow:0 0 32px rgba(34,214,138,0.35),inset 0 0 24px rgba(34,214,138,0.08);
+}
+#jb-fail .jb-icon-ring{
+  border:2px solid #F05050;
+  box-shadow:0 0 32px rgba(240,80,80,0.35),inset 0 0 24px rgba(240,80,80,0.08);
+  animation:icon-ring-in 0.4s ease forwards, shake 0.5s ease 0.4s;
+}
+
+/* SVG icons */
+.jb-check,.jb-x1,.jb-x2{stroke-linecap:round;stroke-linejoin:round;fill:none;stroke-width:3;}
+.jb-check{stroke:#22D68A;stroke-dasharray:55;stroke-dashoffset:55;animation:draw-stroke 0.5s ease 0.45s forwards;}
+.jb-x1{stroke:#F05050;stroke-dasharray:30;stroke-dashoffset:30;animation:draw-stroke 0.35s ease 0.35s forwards;}
+.jb-x2{stroke:#F05050;stroke-dasharray:30;stroke-dashoffset:30;animation:draw-stroke 0.35s ease 0.55s forwards;}
+
+/* Title */
+.jb-title{
+  font-family:Arial Black,Arial,Helvetica,sans-serif;
+  font-size:clamp(18px,4.5vw,30px);white-space:nowrap;letter-spacing:0.1em;
+  opacity:0;animation:slide-up 0.45s ease forwards;
+}
+#jb-success .jb-title{color:#22D68A;text-shadow:0 0 22px rgba(34,214,138,0.45);animation-delay:0.6s;}
+#jb-fail    .jb-title{color:#F05050;text-shadow:0 0 22px rgba(240,80,80,0.45);animation-delay:0.55s;}
+
+/* Sub */
+.jb-sub{
+  font-size:12px;letter-spacing:0.1em;line-height:1.7;
+  opacity:0;animation:slide-up 0.45s ease forwards;
+}
+#jb-success .jb-sub{color:#2e7a5e;animation-delay:0.78s;}
+#jb-fail    .jb-sub{color:#7a3030;animation-delay:0.72s;}
+
+/* Dismiss hint */
+.jb-dismiss{
+  margin-top:8px;font-size:10px;letter-spacing:0.1em;
+  opacity:0;animation:slide-up 0.45s ease forwards;cursor:pointer;
+  border:1px solid rgba(255,255,255,0.08);padding:6px 18px;border-radius:20px;
+  transition:background 0.2s;
+}
+.jb-dismiss:hover{background:rgba(255,255,255,0.05);}
+#jb-success .jb-dismiss{color:#1e5c44;animation-delay:0.95s;}
+#jb-fail    .jb-dismiss{color:#5c1e1e;animation-delay:0.9s;}
+
+/* Keyframes */
+@keyframes icon-ring-in{from{opacity:0;transform:scale(0.5);}to{opacity:1;transform:scale(1);}}
+@keyframes draw-stroke{to{stroke-dashoffset:0;}}
+@keyframes slide-up{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes shake{
+  0%,100%{transform:translateX(0);}
+  20%,60%{transform:translateX(-10px);}
+  40%,80%{transform:translateX(10px);}
+}
 </style>
 </head>
 <body>
@@ -117,54 +181,119 @@ window.applicationCache.onerror=function(e){window.msgs.innerHTML="Error Install
 </script>
 <!-- ═══ END ORIGINAL CACHE SCRIPT ═══════════════════════════════ -->
 
-<div class="hub-wrap">
+<!-- ── Loading screen ─────────────────────────────────────── -->
+<div id="loader">
+  <div class="ld-brand">KLEINKEL <span>TECH HUB</span></div>
+  <div class="ld-ring" aria-hidden="true">
+    <svg class="ld-ring-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle class="ld-ring-track" cx="50" cy="50" r="45" fill="none" stroke-width="2"/>
+      <circle class="ld-ring-arc"   cx="50" cy="50" r="45" fill="none" stroke-width="2.5" transform="rotate(-90 50 50)"/>
+    </svg>
+    <div class="ld-ring-dot"></div>
+  </div>
+  <div class="ld-sub">INSTALLING OFFLINE CACHE &middot; PLEASE WAIT</div>
+  <div class="ld-bar-track"><div class="ld-bar-fill"></div></div>
+</div>
 
+<!-- ── Main content ───────────────────────────────────────── -->
+<div id="main">
   <div>
     <div class="brand-name">KLEINKEL <span class="ac">TECH HUB</span></div>
     <div class="brand-sub">INSTALLING OFFLINE CACHE &middot; DO NOT CLOSE</div>
   </div>
-
   <div class="ring-wrap" aria-hidden="true">
     <svg class="ring-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       <circle class="ring-track" cx="50" cy="50" r="45" fill="none" stroke-width="2"/>
-      <circle class="ring-arc"   cx="50" cy="50" r="45" fill="none" stroke-width="2.5"
-        transform="rotate(-90 50 50)"/>
+      <circle class="ring-arc"   cx="50" cy="50" r="45" fill="none" stroke-width="2.5" transform="rotate(-90 50 50)"/>
     </svg>
     <div class="ring-dot"></div>
   </div>
-
-  <div class="progress-track">
-    <div class="progress-fill" id="pfill"></div>
-  </div>
-
+  <div class="progress-track"><div class="progress-fill" id="pfill"></div></div>
   <div class="status-box">
     <div class="status-hdr"><div id="sdot"></div>CACHE STATUS</div>
     <h1 id="msgs">Starting Cache Installation...</h1>
   </div>
-
   <div class="credits">Special honour to all developers in the PS4 Scene</div>
-
 </div>
 
 <script>
 (function(){
   window._pfill = document.getElementById('pfill');
+
+  /* Dismiss loader quickly — cache pages need to show progress ASAP */
+  setTimeout(function(){
+    var loader = document.getElementById('loader');
+    var main   = document.getElementById('main');
+    if(loader){ loader.classList.add('out'); }
+    setTimeout(function(){
+      if(loader){ loader.style.display = 'none'; } _loaderDone=true; sync();
+      if(main)  { main.classList.add('visible'); }
+    }, 700);
+  }, 2000);
+
   var el = document.getElementById('msgs');
   if(!el) return;
+  var _loaderDone = false;
+  var _successShown = false;
+  var _failShown    = false;
+
+  function showOverlay(id){
+    var ov = document.getElementById(id);
+    if(ov) ov.classList.add('show');
+  }
+
   function sync(){
-    var t = el.textContent.toLowerCase() + el.innerHTML.toLowerCase();
+    var t = el.textContent + el.innerHTML;
+    var tl = t.toLowerCase();
     document.body.classList.remove('s-ok','s-err');
-    if(t.indexOf('✔') !== -1 || t.indexOf('success') !== -1 || t.indexOf('close') !== -1 || t.indexOf('re-open') !== -1){
+
+    var isOk  = tl.indexOf('\u2714')!==-1||tl.indexOf('success')!==-1||tl.indexOf('close')!==-1||tl.indexOf('re-open')!==-1;
+    var isErr = !isOk&&(tl.indexOf('error')!==-1||tl.indexOf('fail')!==-1);
+
+    if(isOk){
       document.body.classList.add('s-ok');
-    } else if(t.indexOf('error') !== -1 || t.indexOf('fail') !== -1){
+      if(!_successShown&&_loaderDone){
+        _successShown=true;
+        setTimeout(function(){ showOverlay('jb-success'); }, 300);
+      }
+    } else if(isErr){
       document.body.classList.add('s-err');
+      if(!_failShown&&_loaderDone){
+        _failShown=true;
+        setTimeout(function(){ showOverlay('jb-fail'); }, 300);
+      }
     }
   }
   sync();
-  var obs = new MutationObserver(sync);
-  obs.observe(el, {childList:true,subtree:true,characterData:true});
+  new MutationObserver(sync).observe(el,{childList:true,subtree:true,characterData:true});
 })();
 </script>
+
+
+<!-- ══ SUCCESS OVERLAY ══════════════════════════════════════════ -->
+<div id="jb-success" class="jb-overlay">
+  <div class="jb-icon-ring">
+    <svg width="56" height="56" viewBox="0 0 56 56">
+      <polyline class="jb-check" points="12,28 23,39 44,17"/>
+    </svg>
+  </div>
+  <div class="jb-title" id="jb-success-title">CACHE INSTALLED</div>
+  <div class="jb-sub"  id="jb-success-sub">Close browser &amp; reopen to run jailbreak</div>
+  <div class="jb-dismiss" onclick="document.getElementById('jb-success').classList.remove('show')">DISMISS</div>
+</div>
+
+<!-- ══ FAIL OVERLAY ═════════════════════════════════════════════ -->
+<div id="jb-fail" class="jb-overlay">
+  <div class="jb-icon-ring">
+    <svg width="56" height="56" viewBox="0 0 56 56">
+      <line class="jb-x1" x1="16" y1="16" x2="40" y2="40"/>
+      <line class="jb-x2" x1="40" y1="16" x2="16" y2="40"/>
+    </svg>
+  </div>
+  <div class="jb-title" id="jb-fail-title">CACHE ERROR</div>
+  <div class="jb-sub"  id="jb-fail-sub">Clear browser data, reopen &amp; try again</div>
+  <div class="jb-dismiss" onclick="document.getElementById('jb-fail').classList.remove('show')">DISMISS</div>
+</div>
 
 </body>
 </html>
