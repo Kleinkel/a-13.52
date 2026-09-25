@@ -188,7 +188,7 @@ body::before{
 
 /* ── State colours ────────────────────────────────────────── */
 body.s-ok .ring-arc{stroke:#22D68A;}
-body.s-ok .ring-svg{filter:drop-shadow(0 0 7px #22D68A);animation-duration:5s;}
+body.s-ok .ring-svg{filter:drop-shadow(0 0 7px #22D68A);}
 body.s-ok .ring-dot{background:#22D68A;box-shadow:0 0 10px #22D68A,0 0 22px rgba(34,214,138,0.4);}
 body.s-ok #sdot{background:#22D68A;box-shadow:0 0 6px #22D68A;}
 body.s-ok #msgs{color:#22D68A;text-shadow:0 0 12px rgba(34,214,138,0.35);}
@@ -208,7 +208,7 @@ body.s-err #msgs{color:#F05050;text-shadow:0 0 12px rgba(240,80,80,0.3);}
 /* ══ SUCCESS / FAIL OVERLAYS ══════════════════════════════════ */
 .jb-overlay{
   position:fixed;inset:0;z-index:8888;
-  background:rgba(4,6,14,0.93);
+  background:rgba(4,6,14,1.0);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
   opacity:0;visibility:hidden;
   transition:opacity 0.5s ease,visibility 0.5s ease;
@@ -448,11 +448,12 @@ if (!isPS4) {
   setTimeout(function(){
     var loader = document.getElementById('loader');
     var main   = document.getElementById('main');
+    /* Crossfade: start fading loader AND revealing main simultaneously */
     if(loader){ loader.classList.add('out'); }
-    /* Wait for fade-out, then reveal main and remove loader from layout */
+    if(main)  { main.classList.add('visible'); }
     setTimeout(function(){
-      if(loader){ loader.style.display = 'none'; } _loaderDone=true; sync();
-      if(main)  { main.classList.add('visible'); }
+      if(loader){ loader.style.display='none'; }
+      _loaderDone=true; sync();
     }, 800);
   }, 3500);
 
@@ -496,7 +497,11 @@ if (!isPS4) {
       document.body.classList.add('s-ok');
       if(!_successShown&&_loaderDone){
         _successShown=true;
-        setTimeout(function(){ showOverlay('jb-success'); }, 300);
+        setTimeout(function(){
+          var m=document.getElementById('msgs');
+          if(m) m.style.visibility='hidden';
+          showOverlay('jb-success');
+        }, 300);
       }
     } else if(isErr){
       document.body.classList.add('s-err');
@@ -521,7 +526,7 @@ if (!isPS4) {
     </svg>
   </div>
   <div class="jb-title" id="jb-success-title">JAILBREAK SUCCESSFUL</div>
-  <div class="jb-sub"  id="jb-success-sub">GoldHEN is now active &mdash; enjoy homebrew</div>
+  <div class="jb-sub"  id="jb-success-sub">GoldHEN is now active &mdash; press the <span style="color:#e2eaf5;">PS Button</span> to return to the home screen and enjoy your games</div>
   <div class="jb-dismiss" onclick="document.getElementById('jb-success').classList.remove('show')">DISMISS</div>
 </div>
 
