@@ -473,7 +473,23 @@ if (!isPS4) {
     var tl = t.toLowerCase();
     document.body.classList.remove('s-ok','s-err');
 
-    var isOk  = tl.indexOf('\u2714')!==-1||tl.indexOf('success')!==-1||tl.indexOf('close')!==-1||tl.indexOf('re-open')!==-1||tl.indexOf('goldhen')!==-1||tl.indexOf('enabled')!==-1;
+    /* Only treat as success when the exploit has definitively completed.
+       The initial #msgs text is "Loading GoldHEN… Please Wait" which
+       contains 'goldhen' — that must NOT trigger the overlay.
+       Match only the exact completion phrases set by the exploit scripts:
+         "GoldHEN v2.4b18.12 Loaded ..."
+         "GoldHEN is Already Loaded ..."
+       plus generic completion signals (✔, success, close, re-open, enabled).
+       Any message still in a "loading / please wait" state is excluded.   */
+    var isStillLoading = tl.indexOf('please wait')!==-1||(tl.indexOf('loading')!==-1&&tl.indexOf('loaded')===-1);
+    var isOk  = !isStillLoading&&(
+      tl.indexOf('\u2714')!==-1||
+      tl.indexOf('success')!==-1||
+      tl.indexOf('close')!==-1||
+      tl.indexOf('re-open')!==-1||
+      tl.indexOf('enabled')!==-1||
+      tl.indexOf('loaded')!==-1          /* catches "GoldHEN … Loaded" */
+    );
     var isErr = !isOk&&(tl.indexOf('error')!==-1||tl.indexOf('fail')!==-1||tl.indexOf('not found')!==-1||tl.indexOf('unsupported')!==-1);
 
     if(isOk){
