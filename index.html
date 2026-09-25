@@ -113,7 +113,7 @@ body::before{
 ══════════════════════════════════════════════════════════════ */
 #main{
   position:relative;z-index:1;
-  opacity:0;transition:opacity 0.7s ease;
+  opacity:1;
   width:100%;max-width:720px;
   margin:0 auto;
   padding:30px 20px 28px;
@@ -138,6 +138,8 @@ body::before{
 .ring-svg{
   width:100%;height:100%;
   animation:ring-spin 2.4s linear infinite;
+  animation-delay:-0.8s;
+  will-change:transform;
   filter:drop-shadow(0 0 7px #00CFFF);transition:filter 0.5s;
 }
 .ring-arc{stroke:#00CFFF;stroke-dasharray:283;stroke-dashoffset:71;stroke-linecap:round;transition:stroke 0.5s;}
@@ -447,10 +449,8 @@ if (!isPS4) {
   /* Dismiss loader after boot animation completes (~3.5s) */
   setTimeout(function(){
     var loader = document.getElementById('loader');
-    var main   = document.getElementById('main');
-    /* Crossfade: start fading loader AND revealing main simultaneously */
+    /* Fade out loader — #main is already visible underneath and ring already spinning */
     if(loader){ loader.classList.add('out'); }
-    if(main)  { main.classList.add('visible'); }
     setTimeout(function(){
       if(loader){ loader.style.display='none'; }
       _loaderDone=true; sync();
