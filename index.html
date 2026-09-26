@@ -113,7 +113,7 @@ body::before{
 ══════════════════════════════════════════════════════════════ */
 #main{
   position:relative;z-index:1;
-  opacity:1;
+  opacity:0;transition:opacity 0.7s ease;
   width:100%;max-width:720px;
   margin:0 auto;
   padding:30px 20px 28px;
@@ -133,24 +133,18 @@ body::before{
 .brand-name .ac{color:#00CFFF;}
 .brand-sub{font-size:13px;color:#3a4e6a;letter-spacing:0.14em;margin-top:10px;}
 
-/* Ring */
-.ring-wrap{position:relative;width:110px;height:110px;flex-shrink:0;}
-.ring-svg{
-  width:100%;height:100%;
-  animation:ring-spin 2.4s linear infinite;
-  animation-delay:-0.8s;
-  will-change:transform;
-  filter:drop-shadow(0 0 7px #00CFFF);transition:filter 0.5s;
-}
-.ring-arc{stroke:#00CFFF;stroke-dasharray:283;stroke-dashoffset:71;stroke-linecap:round;transition:stroke 0.5s;}
-.ring-track{stroke:rgba(0,207,255,0.1);}
-.ring-dot{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:12px;height:12px;border-radius:50%;
-  background:#00CFFF;box-shadow:0 0 10px #00CFFF,0 0 22px rgba(0,207,255,0.4);
-  animation:dot-pulse 1.5s ease-in-out infinite alternate;
-  transition:background 0.5s,box-shadow 0.5s;
+/* Three-dot pulse indicator — no rotation, no stutter */
+.ind-wrap{display:flex;align-items:center;justify-content:center;gap:14px;height:60px;flex-shrink:0;}
+.ind-dot{width:14px;height:14px;border-radius:50%;background:#00CFFF;
+  box-shadow:0 0 10px #00CFFF,0 0 22px rgba(0,207,255,0.4);
+  animation:ind-bounce 1.2s ease-in-out infinite;
+  transition:background 0.4s,box-shadow 0.4s;}
+.ind-dot:nth-child(1){animation-delay:0s;}
+.ind-dot:nth-child(2){animation-delay:0.2s;}
+.ind-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes ind-bounce{
+  0%,80%,100%{transform:scale(0.6);opacity:0.4;}
+  40%{transform:scale(1.2);opacity:1;}
 }
 
 /* FW badge */
@@ -189,28 +183,18 @@ body::before{
 .credits{font-size:11px;color:#1e2d42;letter-spacing:0.05em;line-height:2.2;}
 
 /* ── State colours ────────────────────────────────────────── */
-body.s-ok .ring-arc{stroke:#22D68A;}
-body.s-ok .ring-svg{filter:drop-shadow(0 0 7px #22D68A);}
-body.s-ok .ring-dot{background:#22D68A;box-shadow:0 0 10px #22D68A,0 0 22px rgba(34,214,138,0.4);}
+body.s-ok .ind-dot{background:#22D68A;box-shadow:0 0 10px #22D68A,0 0 22px rgba(34,214,138,0.4);animation:none;transform:scale(1);opacity:1;}
 body.s-ok #sdot{background:#22D68A;box-shadow:0 0 6px #22D68A;}
 body.s-ok #msgs{color:#22D68A;text-shadow:0 0 12px rgba(34,214,138,0.35);}
-body.s-err .ring-arc{stroke:#F05050;}
-body.s-err .ring-svg{filter:drop-shadow(0 0 7px #F05050);animation:none;}
-body.s-err .ring-dot{background:#F05050;box-shadow:0 0 10px #F05050;animation:none;}
+body.s-err .ind-dot{background:#F05050;box-shadow:0 0 10px #F05050;animation:none;transform:scale(1);opacity:1;}
 body.s-err #sdot{background:#F05050;box-shadow:0 0 6px #F05050;animation:none;}
 body.s-err #msgs{color:#F05050;text-shadow:0 0 12px rgba(240,80,80,0.3);}
 
-/* ── Keyframes ────────────────────────────────────────────── */
-@keyframes ring-spin{to{transform:rotate(360deg);}}
-@keyframes dot-pulse{
-  from{transform:translate(-50%,-50%) scale(0.7);opacity:0.5;}
-  to{transform:translate(-50%,-50%) scale(1.2);opacity:1;}
-}
 
 /* ══ SUCCESS / FAIL OVERLAYS ══════════════════════════════════ */
 .jb-overlay{
   position:fixed;inset:0;z-index:8888;
-  background:rgba(4,6,14,1.0);
+  background:rgba(4,6,14,1);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
   opacity:0;visibility:hidden;
   transition:opacity 0.5s ease,visibility 0.5s ease;
@@ -409,13 +393,10 @@ if (!isPS4) {
     <div class="brand-sub">PS4 &middot; GOLDHEN v2.4b18.12 &middot; FW 5.05 &mdash; 13.52</div>
   </div>
 
-  <div class="ring-wrap" aria-hidden="true">
-    <svg class="ring-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <circle class="ring-track" cx="50" cy="50" r="45" fill="none" stroke-width="2"/>
-      <circle class="ring-arc"   cx="50" cy="50" r="45" fill="none" stroke-width="2.5"
-        transform="rotate(-90 50 50)"/>
-    </svg>
-    <div class="ring-dot"></div>
+  <div class="ind-wrap" aria-hidden="true">
+    <div class="ind-dot"></div>
+    <div class="ind-dot"></div>
+    <div class="ind-dot"></div>
   </div>
 
   <div class="fw-badge" id="fw-badge">Detecting firmware&hellip;</div>
@@ -449,11 +430,12 @@ if (!isPS4) {
   /* Dismiss loader after boot animation completes (~3.5s) */
   setTimeout(function(){
     var loader = document.getElementById('loader');
-    /* Fade out loader — #main is already visible underneath and ring already spinning */
+    var main   = document.getElementById('main');
     if(loader){ loader.classList.add('out'); }
+    /* Wait for fade-out, then reveal main and remove loader from layout */
     setTimeout(function(){
-      if(loader){ loader.style.display='none'; }
-      _loaderDone=true; sync();
+      if(loader){ loader.style.display = 'none'; } _loaderDone=true; sync();
+      if(main)  { main.classList.add('visible'); }
     }, 800);
   }, 3500);
 
@@ -474,23 +456,8 @@ if (!isPS4) {
     var tl = t.toLowerCase();
     document.body.classList.remove('s-ok','s-err');
 
-    /* Only treat as success when the exploit has definitively completed.
-       The initial #msgs text is "Loading GoldHEN… Please Wait" which
-       contains 'goldhen' — that must NOT trigger the overlay.
-       Match only the exact completion phrases set by the exploit scripts:
-         "GoldHEN v2.4b18.12 Loaded ..."
-         "GoldHEN is Already Loaded ..."
-       plus generic completion signals (✔, success, close, re-open, enabled).
-       Any message still in a "loading / please wait" state is excluded.   */
     var isStillLoading = tl.indexOf('please wait')!==-1||(tl.indexOf('loading')!==-1&&tl.indexOf('loaded')===-1);
-    var isOk  = !isStillLoading&&(
-      tl.indexOf('\u2714')!==-1||
-      tl.indexOf('success')!==-1||
-      tl.indexOf('close')!==-1||
-      tl.indexOf('re-open')!==-1||
-      tl.indexOf('enabled')!==-1||
-      tl.indexOf('loaded')!==-1          /* catches "GoldHEN … Loaded" */
-    );
+    var isOk  = !isStillLoading&&(tl.indexOf('\u2714')!==-1||tl.indexOf('success')!==-1||tl.indexOf('close')!==-1||tl.indexOf('re-open')!==-1||tl.indexOf('loaded')!==-1||tl.indexOf('enabled')!==-1);
     var isErr = !isOk&&(tl.indexOf('error')!==-1||tl.indexOf('fail')!==-1||tl.indexOf('not found')!==-1||tl.indexOf('unsupported')!==-1);
 
     if(isOk){
@@ -526,7 +493,7 @@ if (!isPS4) {
     </svg>
   </div>
   <div class="jb-title" id="jb-success-title">JAILBREAK SUCCESSFUL</div>
-  <div class="jb-sub"  id="jb-success-sub">GoldHEN is now active &mdash; press the <span style="color:#e2eaf5;">PS Button</span> to return to the home screen and enjoy your games</div>
+  <div class="jb-sub"  id="jb-success-sub">GoldHEN is now active &mdash; press the <span style="color:#e2eaf5;">PS Button</span> to go to the home screen and enjoy your games</div>
   <div class="jb-dismiss" onclick="document.getElementById('jb-success').classList.remove('show')">DISMISS</div>
 </div>
 
