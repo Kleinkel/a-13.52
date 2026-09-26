@@ -311,13 +311,10 @@ if (!isPS4) {
     badge.innerHTML = 'PS4 &middot; FW <span>' + fwVersion + '</span>';
   }
 
-  _loaderDone = true;
-  sync();
-
   /* Watch #msgs for state changes */
   var el = document.getElementById('msgs');
   if(!el) return;
-  var _loaderDone = false;
+  var _loaderDone = true;
   var _successShown = false;
   var _failShown    = false;
 
