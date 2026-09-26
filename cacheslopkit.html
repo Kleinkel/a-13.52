@@ -207,12 +207,9 @@ window.applicationCache.onerror=function(e){window.msgs.innerHTML="Error Install
 (function(){
   window._pfill = document.getElementById('pfill');
 
-  _loaderDone = true;
-  sync();
-
   var el = document.getElementById('msgs');
   if(!el) return;
-  var _loaderDone = false;
+  var _loaderDone = true;
   var _successShown = false;
   var _failShown    = false;
 
